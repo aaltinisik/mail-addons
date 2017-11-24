@@ -36,12 +36,9 @@ class MailMail(osv.Model):
         """
 
         # NEW STUFF
-        catchall_alias = self.pool['ir.config_parameter'].get_param(cr, uid, "mail.catchall.alias_from", context=context)
-        catchall_alias_name = self.pool['ir.config_parameter'].get_param(cr, uid, "mail.catchall.name_alias_from", context=context)
-        catchall_domain = self.pool['ir.config_parameter'].get_param(cr, uid, "mail.catchall.domain", context=context)
-
-        correct_email_from = r'@%s>?\s*$' % catchall_domain
-        default_email_from = '%s@%s' % (catchall_alias, catchall_domain)
+        mail_default_address = self.pool['ir.config_parameter'].get_param(cr, uid, "mail.default_address", context=context)
+        mail_default_name = self.pool['ir.config_parameter'].get_param(cr, uid, "mail.default_name", context=context)
+        mail_domain = self.pool['ir.config_parameter'].get_param(cr, uid, "mail.domain", context=context)
 
         context = dict(context or {})
         ir_mail_server = self.pool.get('ir.mail_server')
@@ -98,10 +95,8 @@ class MailMail(osv.Model):
 
                     # NEW STUFF
                     email_from = mail.email_from
-                    if re.search(correct_email_from, email_from) is None:
-                        email_from = default_email_from
-                    if catchall_alias_name:
-                        email_from = formataddr((catchall_alias_name, email_from))
+                    if re.search(mail_domain, email_from):
+                        email_from = formataddr((mail_default_name, mail_default_address))
 
                     msg = ir_mail_server.build_email(
                         email_from=email_from,  # NEW STUFF
